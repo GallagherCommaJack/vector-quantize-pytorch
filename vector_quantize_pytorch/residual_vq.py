@@ -22,11 +22,12 @@ class ResidualVQ(nn.Module):
 
         for layer in self.layers:
             quantized, indices, loss = layer(residual)
-            residual = residual - quantized
+            residual = residual - quantized.detach()
             quantized_out = quantized_out + quantized
 
             all_indices.append(indices)
             all_losses.append(loss)
+        quantized_out = x + (quantized_out - x).detach()
 
         all_losses, all_indices = map(torch.stack, (all_losses, all_indices))
         return quantized_out, all_indices, all_losses
